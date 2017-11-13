@@ -1,9 +1,6 @@
 ------------------------------------------------------------------------------------------------
 First run lib_check.py to see if you have to proper modules installed for the pass_watcher
 
-the files can be ran individually, or there is a c program that will run the programs
-together which can be made by running "make".
-
 sat.py creates a satellite acquisition table for the station and saves it to the poducts folder
 tle.py creates logs to the log folder and dumps the running tle to the products folder.
 ------------------------------------------------------------------------------------------------

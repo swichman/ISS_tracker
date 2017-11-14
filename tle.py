@@ -22,14 +22,21 @@ local_alt = 1620 # meters
 #   Nothing needs to be changed         #
 #           below this                  #
 #########################################
-print "\n\nGetting latest TLE from nasa.gov"
+
+
+#########################################
 # download latest info from NASA
+#########################################
+print "\n\nGetting latest TLE from nasa.gov"
 testfile = urllib.URLopener()
 testfile.retrieve("https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html", "SVPOST.txt")
 
 input_file = open('SVPOST.txt')
 
+
+#########################################
 # search for latest TLE information
+#########################################
 cond = False
 while cond == False:
 	line = input_file.readline()
@@ -37,26 +44,37 @@ while cond == False:
 		line = input_file.readline()
 		line = input_file.readline()
 		break
-		
 tle1 = input_file.readline()
 tle2 = input_file.readline()
 input_file.close()
 os.remove("SVPOST.txt")
 
+
+#########################################
+# format TLE for use with PyEphem       #
+#########################################
 print "Preparing TLE for use"
 # format TLE for use
 tle1 = tle1.strip()
 tle2 = tle2.strip()
 
+
+#########################################
+# format pass product file              #
+#########################################
 if not os.path.exists('./products/'):
 	os.makedirs("./products")
 if not os.path.exists('./logs/'):
 	os.makedirs("./logs")
-
 tle_file = open("./products/ISS_TLE.txt","w")
 tle_file.write(tle1 + "\n")
 tle_file.write(tle2)
 tle_file.close()
+
+
+#########################################
+# begin track routine                   #
+#########################################
 
 print "\n\n" + "                    TWO LINE MEAN ELEMENT SET\n" + colored('                   .........................................................................','yellow')
 print colored('                   . ','yellow') + colored(tle1,'white') + colored(' .','yellow')
@@ -64,37 +82,46 @@ print colored('                   . ','yellow') + colored(tle2,'white') + colore
 print colored('                   .........................................................................\n\n','yellow')
 
 
+#########################################
+# create log file for real-time track   #
+#########################################
 log_file = open("./logs/log.txt","w")
 log_file.write("Starting logging for ISS contact watcher \n\n")
 log_file.write(tle1 + "\n")
 log_file.write(tle2 + "\n\n")
 log_file.close()
 
-# define degrees
-degrees_per_radian = 180.0 / math.pi
 
-# define home position
-home = ephem.Observer()
-home.lon = '-106.520816'   # +E
-home.lat = '35.080043'      # +N
-home.elevation = 1673.1 # meters
-print "Home coordinates are" + colored(' 35.080043 ','white') + colored('N','red') + colored(' -106.520816 ','white') + colored('E','red') + "\n\n"
-
-# define iss position
-iss = ephem.readtle('ISS', tle1, tle2)
-
+#########################################
+# set variables for track               #
+#########################################
+degrees_per_radian = 180.0 / math.pi        # define degrees
+home = ephem.Observer()                     # define home position
+home.lon = local_lon
+home.lat = local_lat
+home.elevation = local_alt                  # meters
+iss = ephem.readtle('ISS', tle1, tle2)      # define iss position
 home.date = datetime.utcnow()
 next_contact = home.next_pass(iss)
 duration = (next_contact[4] - next_contact[0]) * 86400
+
+
+#########################################
+# readback data for ground station      #
+#########################################
+print "Home coordinates are" + colored(' ' + local_lat,'white') + colored('N','red') + colored(' ' + local_lon,'white') + colored('E','red') + "\n\n"
 print "next pass at " + colored("%s (UTC)" % next_contact[0],'green') +  " with a duration of " + colored("%f" % duration,'green') + " seconds.\n\n"
 print "Rise AZ  : " + colored("%f" % (next_contact[1] * degrees_per_radian),'green')
 print "Fade AZ  : " + colored("%f" % (next_contact[5] * degrees_per_radian),'green')
 print "Max EL   : " + colored("%f" % (next_contact[3] * degrees_per_radian),'green')
 print "Mid Time : " + colored(next_contact[2],'green')
 print "\n\n"
-
 print "======= Beginning ISS sky tracking ======="
 
+
+#########################################
+# begin tracking ISS from gnd site      #
+#########################################
 neg_horizon = False
 
 while True:

@@ -18,19 +18,26 @@ local_alt = 1620 # meters
 
 
 #########################################
-#   Do not change any code below	#
-#   		this line     		#
+#   Do not change any code below	    #
+#   		this line     		        #
 #########################################
 print "\nGenerating the Station Acquisition Table\n\n"
-
 print "Getting latest TLE from nasa.gov"
-# download latest info from NASA
+
+
+#########################################
+# download latest info from NASA        #
+#########################################
 testfile = urllib.URLopener()
 testfile.retrieve("https://spaceflight.nasa.gov/realdata/sightings/SSapplications/Post/JavaSSOP/orbit/ISS/SVPOST.html", "SVPOST.txt")
 print "."
 input_file = open('SVPOST.txt')
 print "."
-# search for latest TLE information
+
+
+#########################################
+# parse for latest TLE information      #
+#########################################
 cond = False
 while cond == False:
 	line = input_file.readline()
@@ -44,14 +51,20 @@ tle2 = input_file.readline()
 input_file.close()
 os.remove("SVPOST.txt")
 
+
+#########################################
+# format TLE for use with PyEphem       #
+#########################################
 print "Preparing TLE for use"
-# format TLE for use
 tle1 = tle1.strip()
 tle2 = tle2.strip()
 
+
+#########################################
+# format pass product file              #
+#########################################
 if not os.path.exists('./products/'):
 	os.makedirs("./products")
-
 print "Generating file"
 sat = open("./products/sat.txt","w")
 sat.write("\n" + "TWO LINE MEAN ELEMENT SET\n" + '.........................................................................\n')
@@ -62,6 +75,10 @@ sat.write(' Rise               | Fade               | RiseAz | FadeAz | MaxEl | 
 sat.write('=========================================================================\n')
 sat.close()
 
+
+#########################################
+# generate pass table from the TLE set  #
+#########################################
 iss = ephem.readtle('ISS', tle1, tle2)
 home = ephem.Observer()
 home.lon = local_lon
@@ -73,18 +90,22 @@ iss.compute(home)
 degrees_per_radian = 180.0 / math.pi
 i = home.next_pass(iss)[0]
 
+
+#########################################
+# parse the pass table into the product #
+# file after converting time base       #
+#########################################
 while i >= next_contact[0] - 1:
 	sat = open("./products/sat.txt","a")
-	#print "{}  ::  {}".format(i,next_contact[0])
 	duration = (next_contact[4] - next_contact[0]) * 86400
 	home.date = next_contact[4] + .02
 	line = " %s | %s | %6.2f | %6.2f | %5.2f | %3d\n" % (next_contact[0], next_contact[4], next_contact[1]*degrees_per_radian, (next_contact[5]*degrees_per_radian), next_contact[3]*degrees_per_radian, duration)
 	sat.write(line)
 	sat.close()
 	next_contact = home.next_pass(iss)
-
 sat=open("./products/sat.txt","a")
 sat.write('\n\n')
 sat.close()
+
 print "Finished\n\n"
 

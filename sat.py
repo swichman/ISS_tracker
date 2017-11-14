@@ -18,8 +18,8 @@ local_alt = 1620 # meters
 
 
 #########################################
-#   Change this information to match    #
-#   your local lat/lon and altitude     #
+#   Do not change any code below	#
+#   		this line     		#
 #########################################
 print "\nGenerating the Station Acquisition Table\n\n"
 

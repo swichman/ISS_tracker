@@ -25,7 +25,7 @@ local_alt = 1620 # meters
 
 
 #########################################
-# download latest info from NASA
+# download latest info from NASA        #
 #########################################
 print "\n\nGetting latest TLE from nasa.gov"
 testfile = urllib.URLopener()
@@ -35,7 +35,7 @@ input_file = open('SVPOST.txt')
 
 
 #########################################
-# search for latest TLE information
+# search for latest TLE information     #
 #########################################
 cond = False
 while cond == False:
